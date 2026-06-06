@@ -1,0 +1,38 @@
+name: Sync TVBox Config
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # 每隔6小时运行一次
+  workflow_dispatch:         # 允许在 GitHub 网页上手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests_html gitpython requests urllib3
+
+      - name: Run GetSrc script
+        env:
+          username: ${{ secrets.GH_USERNAME }}
+          token: ${{ secrets.GH_TOKEN }}
+          repo: ${{ secrets.GH_REPO }}
+          url: ${{ secrets.SOURCE_URL }}
+          target: "tvbox.json"
+          num: "10"
+          timeout: "8"
+          mirror: "1"
+          # signame: ""      # 可选
+          # jar_suffix: "jar"
+        run: |
+          # 如果脚本已经存在于仓库根目录，直接运行
+          python tvbox_tools.py
